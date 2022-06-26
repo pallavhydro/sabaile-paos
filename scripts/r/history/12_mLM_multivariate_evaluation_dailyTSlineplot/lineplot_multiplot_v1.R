@@ -1,0 +1,170 @@
+######################################################################################################### 
+##                            ---------------------------------------------------------------------------
+## ========================== Hydrograph, Lake Evaporation, Lake level evaluation
+##                            ----------------------------------------------------------------------------
+## ---------- Code developer: 
+## -------------------------  Pallav Kumar Shrestha pallav-kumar.shrestha@ufz.de ------
+## -------------------------  3 Feb 2020 ----------------------------------------
+#########################################################################################################
+
+#### Multiplot of Hydrograph, Lake Evaporation, Lake level evaluation
+#### from mHM format time series files (daily data) and output from mLM
+
+## Open libraries/ packages
+# For data analysis
+library(zoo) # for converting dataset to time series object
+library(hydroTSM) # for manipulating time series object
+# For graphics generation
+library(ggplot2)
+library(gridExtra)  # for using "grid.arrange" function
+
+ipath = "/Users/shresthp/Nextcloud/Cloud/macbook/01_work/R/scripts/09_mLM_regulation_relation_ConnectedScatter/"
+opath = "/Users/shresthp/Nextcloud/Cloud/macbook/01_work/R/scripts/12_mLM_multivariate_evaluation_dailyTSlineplot/"
+setwd(ipath)
+# abbrLakes = c("tma", "sob", "ita", "oro", "cas", "arg", "cor", "cla", "eri")
+abbrLakes = c("tma", "tma", "tma", "tma", "tma", "tma", "tma", "tma", "tma")
+# grandidLakes = c("2375", "2516", ...)
+grandidLakes = c("2375", "2375", "2375", "2375", "2375", "2375", "2375", "2375", "2375")
+nameLakes = c("Tr\u00E9s Marias", "Sobradinho", "Itaparica", "Or\u00F3s", "Castanh\u00E3o",
+              "AR Gon\u00E7alves", "Coremas", "Lake St. Clair", "Lake Erie")
+
+nLakes <- length(nameLakes) # number of lakes
+misVal <- -9999.0    # missing value in the output file
+nCol <- 5
+folderVar <- c("q_ds_sim", 
+               "h_ws_sim", 
+               "e_sim")
+fileVar <- c("daily_discharge.out", 
+             "daily_lakelevel.out", 
+             "daily_lakeevaporation.out")
+axisnameVar <- c("streamflow, m3/s", 
+             "water elevation, masl", 
+             "evaporation, mm")
+colorVar <- c("forestgreen", 
+               "blue", 
+               "red")
+
+
+
+#---- Defining multiplot lists
+plots <- list()
+nVar <- length(folderVar)
+nColPlot <- 3
+nRowPlot <- nVar*nLakes/nColPlot
+
+
+# Initialize
+# stat <- array(NA, dim=c(nGauge,4))  # Defining stat as array
+
+
+## RESERVOIR LOOP HERE
+for (i in 1:nLakes) {
+
+  ## VARIABLE LOOP HERE
+  for (j in 1:nVar) {
+
+    # Reading the simulation file
+    fPath <- paste("input/", abbrLakes[i], "/", folderVar[j], "/", fileVar[j], sep="")
+    colHeads = read.delim(fPath, header = FALSE, nrows = 1, sep = "")  # reading all the headers
+    data = data.frame(read.delim(fPath, skip = 1, sep = ""))  # reading all the data
+    colHeads <- sub(".*_", "", colHeads)
+    data[data == misVal] <- NA    # replacing missing values by NA
+    nData <- length(data[,1]) # number of data points
+    dStart <- as.Date(paste(data[1,4],"-",data[1,3],"-",data[1,2],sep=""))            # start date
+    dEnd <- as.Date(paste(data[nData,4],"-",data[nData,3],"-",data[nData,2],sep=""))  # end date
+    date <- seq.Date(dStart,dEnd, by= "days") # date vector
+    
+    # Conditional Transparancy <temporary for paper storyine concept figure>
+    if(i == 1 ){
+      # show colors
+      opacity = 1
+    } else {
+      # no colors
+      opacity = 0
+    }    
+    
+    # Conditional: Plot title
+    if(j == 1 ){
+      # show plot title
+      title <- nameLakes[i]
+    } else {
+      # no show
+      title <- ""
+    }
+    
+    # Conditional: X-axis title
+    if( i == 3 && j == 3 ){
+      # show x-axis title
+      xlab <- "Time [days]"
+    } else {
+      # no show
+      xlab <- ""
+    }
+    
+    # Conditional: Y-axis title
+    if(i <= 3 ){
+      # show y-axis title
+      ylab <- axisnameVar[j]
+    } else {
+      # no show
+      ylab <- ""
+    }
+    
+    
+    
+    ## ==================| GRAPHICS |==============================
+    
+    xplot <- ggplot(data, aes(x=date)) + 
+      geom_line(aes(y=data[,nCol], color="observation"), linetype = 2, alpha = opacity) + 
+        # The color statement needs to be inside aes for the legend to appear
+      geom_line(aes(y=data[,nCol + 1], color="mHM simulation"), alpha = opacity) +
+      labs(title = title) +
+      ylab(ylab) + 
+      xlab(xlab) +
+      scale_colour_manual("", values = c("observation"="black", "mHM simulation"=colorVar[j])) +
+      scale_x_date(date_breaks= "1 year", 
+                   date_labels = "%Y", 
+                   expand = c(0,0)) + # duplicating the axis for the top was not possible with date axis
+      scale_y_continuous(sec.axis = dup_axis(name ="", labels = c()), 
+                         # limits = c(0,qmax*1.2), 
+                         expand = c(0,0)) + # adding extra space at the top for annotations
+      theme(text=element_text(family = "Helvetica"), 
+            axis.ticks.length=unit(-0.25, "cm"), 
+            axis.text.x = element_text(margin = margin(t = 10)), 
+            axis.text.y = element_text(margin = margin(r = 10)), 
+            axis.title.y = element_text(margin = margin(r = 10)), 
+            axis.title.x = element_text(margin = margin(t = 10)), 
+            panel.border = element_rect(colour = "black", fill=NA, size=1), 
+            panel.background = element_blank(), 
+            legend.position = c(0.75,1.2), 
+            legend.direction = "horizontal",
+            plot.title = element_text(size = 18), 
+            plot.subtitle = element_text(size = 12),
+            plot.margin = margin(t=0,b=0,l=5,r=0, unit = "pt"))
+  
+    # Append to multiplot 
+    xplot <- ggplotGrob(xplot)
+    plots[[(i-1)*nVar + j]] <- xplot
+  
+  } # Variable loop ends
+  
+} # Reservoir loop ends
+
+
+# Defining the layout of the multiplot
+xlay <- matrix(c(1:(nLakes*nVar)), nRowPlot, nColPlot, byrow = FALSE)
+
+select_grobs <- function(lay) {
+  id <- unique(c(lay)) # transpose ON if byrow = TRUE in xlay! If not, remove transpose!
+  id[!is.na(id)]
+}
+
+
+# Output
+setwd(opath)
+pdf("multivariate_evaluation_TSplot_v1.pdf", width = 5*nColPlot, height = 2*nRowPlot) # each subplot is 5x5 inches
+grid.arrange(grobs=plots[select_grobs(xlay)], layout_matrix=xlay) 
+
+# Close PDF
+dev.off()
+
