@@ -82,7 +82,21 @@ Useful if your ecflow server is ping fails (e.g. due to EVE maintenance, etc.)
 
 ### **D. Enhanced ecflow_ui with Portforwarding**
 
-ssh -vJ shresthp@datascience1.eve.ufz.de shresthap@datascience1 -C -N -L 43999:datascience1:43999
+# Install conda, and create ecflow environment in your local machine
+
+# Then open ecflow_ui and add a server with host as `localhost` and port as same as used for ecflow server on eve
+
+# Then use the following to start portforwarding between local machine and eve:
+ssh -vJ shresthp@datascience1.eve.ufz.de shresthp@datascience1 -C -N -L 43999:datascience1:43999
+
+# If you get `Address already in use` message:
+1) type the following:
+`sudo lsof -i :43999`
+2) note the PID from the table displayed and kill that PID:
+`kill -9 <PID>`
+
+# Open the UI
+`ecflow_ui &`
 
 
 
