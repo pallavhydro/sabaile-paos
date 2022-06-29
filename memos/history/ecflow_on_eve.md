@@ -101,3 +101,21 @@ ssh -vJ shresthp@datascience1.eve.ufz.de shresthp@datascience1 -C -N -L 43999:da
 
 
 
+### **E. To Kill ecFlow server**
+
+1. check with
+`eclow_client --stats`
+
+2. identify your victim (the process ID!) with 
+`netstat -lnptu | grep ecflow`
+
+3. then kill that process ID
+`kill -9 <PID>`
+
+4. confirm your kill with
+`eclow_client --stats`
+
+
+
+
+
