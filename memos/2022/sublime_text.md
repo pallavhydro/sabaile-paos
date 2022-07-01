@@ -1,7 +1,7 @@
-Memos on sublime text
+# Memos on sublime text
 
 
-# Link syntax to file extension (if not working automatically)
+## Link syntax to file extension (if not working automatically)
 
 1. Open a file with the extension and apply the syntax manually.
 
