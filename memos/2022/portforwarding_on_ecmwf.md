@@ -11,9 +11,9 @@
 3. Then do everything after 2.2. [here](https://confluence.ecmwf.int/display/ECFLOW/Teleport+-+using+local+ecflow_ui#Teleportusinglocalecflow_ui-Method%232:DynamicPortForwarding). 
 
 - For Atos
-`ssh -v -C -N -D 9050 -J cyrs@jump.ecmwf.int cyrs@aa-login`
+`ssh -v -C -N -D 9050 -J <username>@jump.ecmwf.int <username>@aa-login`
 - FOR ECMWF-Reading
-`ssh -v -C -N -D 9050 -J cypk@shell.ecmwf.int cypk@ccb-login4`
+`ssh -v -C -N -D 9050 -J <username>@shell.ecmwf.int <username>@ccb-login4`
 
 4. The proxychains worked via 
 `brew install proxychains-ng` 

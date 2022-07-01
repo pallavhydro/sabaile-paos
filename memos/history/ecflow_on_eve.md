@@ -25,7 +25,7 @@ By default, conda environments are stored in `~/.conda/envs/`
 
 
 2. Define the ECF port and host
-`export ECF_PORT=43999 `
+`export ECF_PORT=<port> `
 `export ECF_HOST=datascience1`
 Each user should have a unique *ECF_PORT*. Enter your port [here](https://git.ufz.de/chs/ecfpy/-/wikis/home)
 
@@ -46,7 +46,7 @@ log files will be written here
 `source activate /global/apps/ecfPy/5.7.0`
 
 2. Define the ECF port and host
-`export ECF_PORT=43999 `
+`export ECF_PORT=<port> `
 `export ECF_HOST=datascience1`
 
 3. Ping the server (optional, if you want to check)
@@ -64,7 +64,7 @@ Useful if your ecflow server is ping fails (e.g. due to EVE maintenance, etc.)
 `source activate /global/apps/ecfPy/5.7.0`
 
 2. Define the ECF port and host
-`export ECF_PORT=43999 `
+`export ECF_PORT=<port> `
 `export ECF_HOST=datascience1`
 
 3. Start the server from the ecflow server folder
@@ -85,11 +85,11 @@ Useful if your ecflow server is ping fails (e.g. due to EVE maintenance, etc.)
 2. Then open ecflow_ui and add a server with host as `localhost` and port as same as used for ecflow server on eve
 
 3. Then use the following to start portforwarding between local machine and eve:
-ssh -vJ shresthp@datascience1.eve.ufz.de shresthp@datascience1 -C -N -L 43999:datascience1:43999
+ssh -vJ <username>@datascience1.eve.ufz.de <username>@datascience1 -C -N -L <port>:datascience1:<port>
 
 4. If you get `Address already in use` message:
 - type the following:
-`sudo lsof -i :43999`
+`sudo lsof -i :<port>`
 - note the PID from the table displayed and kill that PID:
 `kill -9 <PID>`
 
