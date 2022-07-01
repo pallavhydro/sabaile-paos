@@ -1,7 +1,7 @@
-ecflow setup and usage on EVE
+# ecflow setup and usage on EVE
 
 
-### **A. SETUP** - *begin*
+## **A. SETUP**
 Setup is a one time thingy 
 
 <!-- Old:
@@ -19,83 +19,81 @@ By default, conda environments are stored in `~/.conda/envs/`
 `conda install -c conda-forge f90nml sh ecflow` -->
 
 
-New: (eve's ecflow)
+1. Load modules
 `module load Anaconda3`
 `source activate /global/apps/ecfPy/5.7.0`
 
 
-# Define the ECF port and host
+2. Define the ECF port and host
 `export ECF_PORT=43999 `
 `export ECF_HOST=datascience1`
-Each user should have a unique *ECF_PORT*
+Each user should have a unique *ECF_PORT*. Enter your port [here](https://git.ufz.de/chs/ecfpy/-/wikis/home)
 
-# Make the ecflow server folder
+3. Make the ecflow server folder
 `mkdir -p ~/ecflow_server/v5.7.0`
 
-# Start the server from this folder
+4. Start the server from this folder
 log files will be written here
 `cd ~/ecflow_server/v5.7.0`
 `ecflow_server &`
 
-### **Setup** - *end*
 
 
+## **B. Normal procedure**
 
-### **B. Normal procedure**
-
-# activate
+1. activate
 `module load Anaconda3`
 `source activate /global/apps/ecfPy/5.7.0`
 
-# Define the ECF port and host
+2. Define the ECF port and host
 `export ECF_PORT=43999 `
 `export ECF_HOST=datascience1`
 
-# Ping the server (optional, if you want to check)
+3. Ping the server (optional, if you want to check)
 `ecflow_client --ping`
 
-# Open the UI
+4. Open the UI
 `ecflow_ui &`
 
 
-### **C. To Restart server**
+## **C. To Restart server**
 Useful if your ecflow server is ping fails (e.g. due to EVE maintenance, etc.) 
 
-# activate
+1. activate
 `module load Anaconda3`
 `source activate /global/apps/ecfPy/5.7.0`
 
-# Define the ECF port and host
+2. Define the ECF port and host
 `export ECF_PORT=43999 `
 `export ECF_HOST=datascience1`
 
-# Start the server from the ecflow server folder
+3. Start the server from the ecflow server folder
 `cd ~/ecflow_server/v5.7.0`
 `ecflow_server &`
 
-# Ping the server
+4. Ping the server
 `ecflow_client --ping`
 
-# Open the UI
+5. Open the UI
 `ecflow_ui &`
 
 
-### **D. Enhanced ecflow_ui with Portforwarding**
+## **D. Enhanced ecflow_ui with Portforwarding**
 
-# Install conda, and create ecflow environment in your local machine
+1. Install conda, and create ecflow environment in your local machine
 
-# Then open ecflow_ui and add a server with host as `localhost` and port as same as used for ecflow server on eve
+2. Then open ecflow_ui and add a server with host as `localhost` and port as same as used for ecflow server on eve
 
-# Then use the following to start portforwarding between local machine and eve:
+3. Then use the following to start portforwarding between local machine and eve:
 ssh -vJ shresthp@datascience1.eve.ufz.de shresthp@datascience1 -C -N -L 43999:datascience1:43999
 
-# If you get `Address already in use` message:
-1) type the following:
+4. If you get `Address already in use` message:
+- type the following:
 `sudo lsof -i :43999`
-2) note the PID from the table displayed and kill that PID:
+- note the PID from the table displayed and kill that PID:
 `kill -9 <PID>`
 
-# Open the UI
+5. Open the UI
 `ecflow_ui &`
 
 
