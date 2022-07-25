@@ -26,8 +26,16 @@ Option 1:
 		...
 	done
 
+
 Option 2:
 	for i in {0..10..2}; do # where i starts from 0 and ends at 10
+		...
+	done
+
+
+Option 3: if variable is to be used as loop control
+
+	for i in $( seq 0 ${step} ${end} ); do # where i starts from 0 and ends at "end"
 		...
 	done
 
@@ -51,3 +59,31 @@ Option 2:
 head -80 file | tail -16 > newfile
 ```
 \
+
+6. If statement in bash
+
+```
+Options 1: with numeric expression
+
+if [[ ${a} < ${b} ]]; then 
+	echo "works"
+fi
+```
+\
+
+7. Control tmux panes with mouse
+
+Add the following to `~/.tmux.conf`
+
+```
+set -g mouse on
+
+```
+
+Then source the config file
+
+```
+tmux source-file ~/.tmux.conf
+```
+\
+

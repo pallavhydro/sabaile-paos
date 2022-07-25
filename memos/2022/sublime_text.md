@@ -22,3 +22,12 @@
 4. Thenafter, every f90 and F90 files that I opened got displayed in the syntax desired.
 
 `Note:` Needless to say, this only works for valid files. For instance if I just name a random text file with f90 extension, it won't work.
+
+
+## Call sublime text from terminal
+
+Make a symbolic link to sublime text at `/usr/local/bin/subl`:
+
+```
+sudo ln -s /Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl /usr/local/bin/subl
+```
