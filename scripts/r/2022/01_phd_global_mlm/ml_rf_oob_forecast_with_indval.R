@@ -25,7 +25,7 @@ source("~/git/gh/sabaile-paos/scripts/r/history/28_mlm_plots/timeseries_line.R")
 ## PATHS
 ##========================================
 
-path_w = "~/work/projects/09_phd/03_sim/02_randomforest/rf_crossvalidation/"
+path_o = "~/work/projects/09_phd/03_sim/02_randomforest/rf_crossvalidation/"
 path_d = "~/work/projects/09_phd/01_data/01_rappbode_rinke/processing/time_series/"
 
 
@@ -85,6 +85,11 @@ dataxts_pro$month = as.numeric(strftime(index(dataxts_raw), format = "%m"))
 
 # Meteorology predictors
 # -------------------
+
+# 3 days running pre sum
+dataxts_pro$Pre3 = rollapply(dataxts_raw$Pre, 3, FUN = "sum", na.rm = TRUE)
+# 1 week running pre sum
+dataxts_pro$Pre7 = rollapply(dataxts_raw$Pre, 7, FUN = "sum", na.rm = TRUE)
 # 30 day running pre sum
 dataxts_pro$Pre30 = rollapply(dataxts_raw$Pre, 30, FUN = "sum", na.rm = TRUE)
 # 30 day running tavg mean
@@ -211,9 +216,12 @@ for (iter in 1: nrand_iter){
   
   # COMMUNICATE
   # ========================================
-  print(paste("iteration", iter, ", KGEs: ", 
+  message = paste("iteration", iter, ", KGEs: ", 
               per_mat_3d[ 1, 1, iter],
-              per_mat_3d[ 1, 2, iter], sep = " "))
+              per_mat_3d[ 1, 2, iter], "\n", sep = " ")
+  
+  print(message)
+  cat(message, file = paste(path_o, "/iteration_output.txt", sep = ""), append = TRUE)
   
   
   rm(yrs_random, yrs_t, yrs_iv, 
@@ -234,7 +242,9 @@ end.time <- Sys.time()
 print(paste("Started at:  ", start.time, sep = ""))
 print(paste("Finished at: ", end.time, sep = ""))
 
-
+# Output
+write.table(yrs_t_mat_2d, file=paste(path_o, "/yrs_t_mat_2d.txt", sep = ""), sep=",", quote = F, row.names = F)
+write.table(yrs_iv_mat_2d, file=paste(path_o, "/yrs_iv_mat_2d.txt", sep = ""), sep=",", quote = F, row.names = F)
 
 
 ##========================================
