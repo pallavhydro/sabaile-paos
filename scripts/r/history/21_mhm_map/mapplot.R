@@ -9,7 +9,9 @@
 ##  Usage:     Place this file alongside netcdf file/s and type the following in
 ##             the command line -
 ##
-##                              Rscript mapplot.R <color_key_flag> <variable name> <time slice in dd/mm/YYYY format> 
+##                              Rscript mapplot.R <file name> <variable name> <time slice in dd/mm/YYYY format> <color_key_flag>
+##
+##                         e.g. Rscript mapplot.R SMI.nc SMI 01/01/2005 TRUE
 ##
 ##  Output:    animate.pdf
 ##

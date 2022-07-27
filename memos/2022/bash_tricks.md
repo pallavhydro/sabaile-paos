@@ -87,3 +87,10 @@ tmux source-file ~/.tmux.conf
 ```
 \
 
+8. Create a conda env at default folder with a name
+
+```
+conda create --name mhm_env
+```
+\
+
