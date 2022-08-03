@@ -17,6 +17,7 @@ library(randomForest)
 library(stringr)
 library(reshape) # for melt
 library(hydroGOF) # for using fucntions KGE and NSE
+source("~/git/gh/sabaile-paos/scripts/r/2022/01_phd_global_mlm/prepare_var_from_mlm_fluxes_states.R")
 source("~/git/gh/sabaile-paos/scripts/r/2022/01_phd_global_mlm/prepare_var_from_txt_input.R")
 source("~/git/gh/sabaile-paos/scripts/r/history/28_mlm_plots/timeseries_line.R")
 
@@ -25,8 +26,8 @@ source("~/git/gh/sabaile-paos/scripts/r/history/28_mlm_plots/timeseries_line.R")
 ## PATHS
 ##========================================
 
-path_o = "~/work/projects/09_phd/03_sim/02_randomforest/rf_crossvalidation/"
-path_d = "~/work/projects/09_phd/01_data/01_rappbode_rinke/processing/time_series/"
+path_o = "~/work/projects/09_phd/03_sim/02_randomforest/exp/3195/predictor_from_mlm/"
+path_d = "~/work/projects/09_phd/03_sim/02_randomforest/exp/3195/predictor_from_mlm/data/"
 
 
 
@@ -61,8 +62,12 @@ yrs_iv_mat_2d <- array(dim = 0)
 ##========================================
 
 dataxts_raw = prepare_var_from_txt_input(paste(path_d, "3195_outflow.txt", sep = "/"), "QoutRMD")
-dataxts_raw = cbind(dataxts_raw, prepare_var_from_txt_input(paste(path_d, "2044_pre.txt", sep = "/"), "Pre"))
-dataxts_raw = cbind(dataxts_raw, prepare_var_from_txt_input(paste(path_d, "2044_tavg.txt", sep = "/"), "Tavg"))
+# dataxts_raw = cbind(dataxts_raw, prepare_var_from_txt_input(paste(path_d, "2044_pre.txt", sep = "/"), "Pre"))
+# dataxts_raw = cbind(dataxts_raw, prepare_var_from_txt_input(paste(path_d, "2044_tavg.txt", sep = "/"), "Tavg"))
+
+dataxts_raw = cbind(dataxts_raw, prepare_var_from_mlm_fluxes_states(paste(path_d, "mLM_Fluxes_States.nc", sep = "/"), "Lpre_catch"))
+dataxts_raw = cbind(dataxts_raw, prepare_var_from_mlm_fluxes_states(paste(path_d, "mLM_Fluxes_States.nc", sep = "/"), "Lpet_catch"))
+dataxts_raw = cbind(dataxts_raw, prepare_var_from_mlm_fluxes_states(paste(path_d, "mLM_Fluxes_States.nc", sep = "/"), "Ltavg_catch"))
 
 
 
@@ -86,24 +91,42 @@ dataxts_pro$month = as.numeric(strftime(index(dataxts_raw), format = "%m"))
 # Meteorology predictors
 # -------------------
 
+# Precipitation
 # 3 days running pre sum
-dataxts_pro$Pre3 = rollapply(dataxts_raw$Pre, 3, FUN = "sum", na.rm = TRUE)
+dataxts_pro$Pre3 = rollapply(dataxts_raw$Lpre_catch, 3, FUN = "sum", na.rm = TRUE)
 # 1 week running pre sum
-dataxts_pro$Pre7 = rollapply(dataxts_raw$Pre, 7, FUN = "sum", na.rm = TRUE)
+dataxts_pro$Pre7 = rollapply(dataxts_raw$Lpre_catch, 7, FUN = "sum", na.rm = TRUE)
 # 30 day running pre sum
-dataxts_pro$Pre30 = rollapply(dataxts_raw$Pre, 30, FUN = "sum", na.rm = TRUE)
-# 30 day running tavg mean
-dataxts_pro$Tavg30 = rollapply(dataxts_raw$Tavg, 30, FUN = "mean", na.rm = TRUE)
+dataxts_pro$Pre30 = rollapply(dataxts_raw$Lpre_catch, 30, FUN = "sum", na.rm = TRUE)
 # 365 days running pre sum
-dataxts_pro$Pre365 = rollapply(dataxts_raw$Pre, 365, FUN = "sum", na.rm = TRUE)
+dataxts_pro$Pre365 = rollapply(dataxts_raw$Lpre_catch, 365, FUN = "sum", na.rm = TRUE)
 
 # Pre30 with 30 days lag
 dataxts_pro$Pre30lag30 = c( rep(NA,30), as.numeric(head( dataxts_pro$Pre30, -30 )) ) 
 # Pre365 with 365 days lag
 dataxts_pro$Pre365lag365 = c( rep(NA,365), as.numeric(head( dataxts_pro$Pre365, -365 )) )
 
-# NaN with 0
-dataxts_pro[is.na(dataxts_pro)] = 0
+# PET
+# 3 days running pet sum
+dataxts_pro$Pet3 = rollapply(dataxts_raw$Lpet_catch, 3, FUN = "sum", na.rm = TRUE)
+# 1 week running pet sum
+dataxts_pro$Pet7 = rollapply(dataxts_raw$Lpet_catch, 7, FUN = "sum", na.rm = TRUE)
+# 30 day running pet sum
+dataxts_pro$Pet30 = rollapply(dataxts_raw$Lpet_catch, 30, FUN = "sum", na.rm = TRUE)
+# 365 days running pet sum
+dataxts_pro$Pet365 = rollapply(dataxts_raw$Lpet_catch, 365, FUN = "sum", na.rm = TRUE)
+
+# pet30 with 30 days lag
+dataxts_pro$Pet30lag30 = c( rep(NA,30), as.numeric(head( dataxts_pro$Pet30, -30 )) ) 
+# pet365 with 365 days lag
+dataxts_pro$Pet365lag365 = c( rep(NA,365), as.numeric(head( dataxts_pro$Pet365, -365 )) )
+
+# 30 day running tavg mean
+dataxts_pro$Tavg30 = rollapply(dataxts_raw$Ltavg_catch, 30, FUN = "mean", na.rm = TRUE)
+
+
+# # NaN with 0
+# dataxts_pro[is.na(dataxts_pro)] = 0
 
 # Subset experiment time window
 dataxts_pro = dataxts_pro[paste(sy,"/",ey, sep = "")]
@@ -136,7 +159,8 @@ for (iter in 1: nrand_iter){
   ##========================================
   
   # years vector in random order
-  yrs_random = sample(yrs) 
+  # yrs_random = sample(yrs) 
+  yrs_random = yrs
   
   # years vector for training
   yrs_t = yrs_random[1: nyr_t] 
@@ -275,56 +299,57 @@ write.table(yrs_iv_mat_2d, file=paste(path_o, "/yrs_iv_mat_2d.txt", sep = ""), s
 # dev.off()
 # 
 # 
-# ## Plot HYDROGRAPH
-# # -------------------------------------
-# 
-# # Metrics
-# statR2_t <- round(cor(ymod_t,data_t$QoutRMD)^2,2)  # R2 
-# statKGE_t <- round(KGE(ymod_t,data_t$QoutRMD,na.rm = TRUE),2)  # KGE 
-# statNSE_t <- round(NSeff(ymod_t,data_t$QoutRMD,na.rm = TRUE),2)  # NSE
-# statPBS_t <- round(pbias(ymod_t,data_t$QoutRMD,na.rm = TRUE),2)  # PBIAS
-# 
-# statR2_cv <- round(cor(ymod_cv,data_cv$QoutRMD)^2,2)  # R2 
-# statKGE_cv <- round(KGE(ymod_cv,data_cv$QoutRMD,na.rm = TRUE),2)  # KGE 
-# statNSE_cv <- round(NSeff(ymod_cv,data_cv$QoutRMD,na.rm = TRUE),2)  # NSE
-# statPBS_cv <- round(pbias(ymod_cv,data_cv$QoutRMD,na.rm = TRUE),2)  # PBIAS
-# 
-# statR2_iv <- round(cor(ymod_iv,data_iv$QoutRMD)^2,2)  # R2 
-# statKGE_iv <- round(KGE(ymod_iv,data_iv$QoutRMD,na.rm = TRUE),2)  # KGE 
-# statNSE_iv <- round(NSeff(ymod_iv,data_iv$QoutRMD,na.rm = TRUE),2)  # NSE
-# statPBS_iv <- round(pbias(ymod_iv,data_iv$QoutRMD,na.rm = TRUE),2)  # PBIAS
-# 
-# 
-# # Bind
-# data_xts = dataxts_pro[paste(sy_t,"/",ey_iv, sep = "")]
-# date_full= index(data_xts)
+## Plot HYDROGRAPH
+# -------------------------------------
+
+# Metrics
+statR2_t <- round(cor(ymod_t,data_t$QoutRMD)^2,2)  # R2
+statKGE_t <- round(KGE(ymod_t,data_t$QoutRMD,na.rm = TRUE),2)  # KGE
+statNSE_t <- round(NSeff(ymod_t,data_t$QoutRMD,na.rm = TRUE),2)  # NSE
+statPBS_t <- round(pbias(ymod_t,data_t$QoutRMD,na.rm = TRUE),2)  # PBIAS
+
+statR2_iv <- round(cor(ymod_iv,data_iv$QoutRMD)^2,2)  # R2
+statKGE_iv <- round(KGE(ymod_iv,data_iv$QoutRMD,na.rm = TRUE),2)  # KGE
+statNSE_iv <- round(NSeff(ymod_iv,data_iv$QoutRMD,na.rm = TRUE),2)  # NSE
+statPBS_iv <- round(pbias(ymod_iv,data_iv$QoutRMD,na.rm = TRUE),2)  # PBIAS
+
+
+# Bind
+data_xts = dataxts_pro[paste(sy,"/",ey, sep = "")]
+date_full= index(data_xts)
 # plot_data <- cbind(data_xts$QoutRMD, ymod_t_xts, ymod_cv_xts, ymod_iv_xts)
-# 
-# # Melt
-# plot_data_df <- data.frame(plot_data)
-# plot_data_df$id <- rownames(plot_data_df)
-# plot_data_melted <- melt(plot_data_df)
-# # id must be date class
-# plot_data_melted$id <- rep( date_full, length(plot_data[1,]))
-# 
-# 
-# # Create table of metrics
-# plot_table <- matrix( c(statR2_t, statR2_cv, statR2_iv,
-#                         statKGE_t, statKGE_cv, statKGE_iv,
-#                         statNSE_t, statNSE_cv, statNSE_iv,
-#                         statPBS_t, statPBS_cv, statPBS_iv), 
-#                       byrow = F, ncol = 4)
-# colnames(plot_table) = c("R2", "KGE", "NSE", "Bias (%)")
-# rownames(plot_table) = c("training","cross-val","ind.-val") 
-# 
-# 
-# # plot hydrograph
-# if("randomForest" %in% (.packages())){
-#   detach("package:randomForest", unload = TRUE) # necessary to prevent conflict with ggplot2 in plot functions
-# }
-# plot_timeseries_line(plot_data_melted, path_w, "rf_t_cv_iv.pdf", 
-#                      "RAPPBODE OUTFLOW \n\nRandom Forest 'out-of-box' forecast", "outflow [m3/s]", "",
-#                      c("black", "blue", "green", "red"), c(rep(0.5, 4)), 
-#                      c("observed", "training","cross-val","ind.-val"), 
-#                      c(0.75, 0.9), "5 year", "%Y", c(0, 10), plot_table)
-# 
+plot_data <- cbind(data_xts$QoutRMD, ymod_t_xts, ymod_iv_xts)
+
+# Melt
+plot_data_df <- data.frame(plot_data)
+plot_data_df$id <- rownames(plot_data_df)
+plot_data_melted <- melt(plot_data_df)
+# id must be date class
+plot_data_melted$id <- rep( date_full, length(plot_data[1,]))
+
+
+# Create table of metrics
+plot_table <- matrix( c(statR2_t, statR2_iv,
+                        statKGE_t, statKGE_iv,
+                        statNSE_t, statNSE_iv,
+                        statPBS_t, statPBS_iv),
+                      byrow = F, ncol = 4)
+colnames(plot_table) = c("R2", "KGE", "NSE", "Bias (%)")
+rownames(plot_table) = c("training", "validation")
+
+
+# plot hydrograph
+if("randomForest" %in% (.packages())){
+  detach("package:randomForest", unload = TRUE) # necessary to prevent conflict with ggplot2 in plot functions
+}
+plot_timeseries_line(plot_data_melted, path_o, "rf_tv_best.pdf",
+                      "RAPPBODE OUTFLOW: Best iteration \n\nRandom Forest 'out-of-box' forecast", "outflow [m3/s]", "",
+                      c("black", "blue", "red"), c(rep(0.5, 3)),
+                      c("observed", "training","validation"),
+                      c(0.75, 0.9), "5 year", "%Y", c(0, 10), plot_table)
+plot_timeseries_line(plot_data_melted, path_o, "rf_tv_chron_mlmpredictors_selected.pdf",
+                     "RAPPBODE OUTFLOW: Chronology set \n\nRandom Forest 'out-of-box' forecast", "outflow [m3/s]", "",
+                     c("black", "blue", "red"), c(rep(0.5, 3)),
+                     c("observed", "training","validation"),
+                     c(0.75, 0.9), "5 year", "%Y", c(0, 10), plot_table)
+

@@ -23,14 +23,12 @@ library(ragg)    # for scaling plot
 
 
 
-plot_hydrographx2 <- function(path1, path2, suffix1, suffix2, gID, title_text , ylimit ){
+plot_hydrographx2 <- function(opath, file1, file2, suffix1, suffix2, gID, title_text , ylimit ){
 
 
   # ========  CONTROL  =============================================
   
   # Parameters
-  fName = "discharge.nc"
-  # fName = "discharge_1967_1971.nc"
   misVal = -9999.0
   
   # Graph control
@@ -42,7 +40,7 @@ plot_hydrographx2 <- function(path1, path2, suffix1, suffix2, gID, title_text , 
   # ========  READ  =============================================
   
   # Read the netCDF discharge file 1
-  ncin <- nc_open(paste(path1,fName,sep = "/"))
+  ncin <- nc_open(file1)
   # get VARIABLES
   q_obs1 <- ncvar_get(ncin, paste("Qobs_", str_pad(gID, 10, pad = "0"), sep = ""))
   q_sim1 <- ncvar_get(ncin, paste("Qsim_", str_pad(gID, 10, pad = "0"), sep = ""))
@@ -55,7 +53,7 @@ plot_hydrographx2 <- function(path1, path2, suffix1, suffix2, gID, title_text , 
   
   
   # Read the netCDF discharge file 1
-  ncin <- nc_open(paste(path2,fName,sep = "/"))
+  ncin <- nc_open(file2)
   # get VARIABLES
   q_sim2 <- ncvar_get(ncin, paste("Qsim_", str_pad(gID, 10, pad = "0"), sep = ""))
   # Close file
@@ -184,7 +182,7 @@ plot_hydrographx2 <- function(path1, path2, suffix1, suffix2, gID, title_text , 
     scale_y_continuous(name = expression(paste("Streamflow [",m^{3},".",s^{-1},"]")), limits = mylimit , sec.axis = dup_axis(name ="", labels = c()), expand = c(0,0))  # adding extra space at the top for annotations
   
   # Output
-  ggsave(hydrograph, file=paste(path1,"/",gID,"_hydrograph.png",sep=""), width = 18, height = 5, units = "in")
+  ggsave(hydrograph, file=paste(opath, "/", gID, ".png",sep=""), width = 18, height = 5, units = "in")
 
 }
 

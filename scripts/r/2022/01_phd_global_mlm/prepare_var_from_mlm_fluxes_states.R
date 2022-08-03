@@ -35,7 +35,7 @@ options(warn = oldw)
 
 #::: THE FUNCTION ===================
 
-prepare_var_from_mlm_fluxes_states <- function( file, var ){
+prepare_var_from_mlm_fluxes_states <- function( file, var, daily_flag ){
   
   
   # ========  ARGUMENT DEFINITIONS  =================================
@@ -44,6 +44,7 @@ prepare_var_from_mlm_fluxes_states <- function( file, var ){
   # var  - variable name that serves two purpose: 
   #           1 - as string to extract the correct data
   #           2 - as column header for the xts object returned
+  # daily_flag  - TRUE if daily, FALSE if subdaily
   
   
   # ========  CONTROL  =============================================
@@ -75,8 +76,15 @@ prepare_var_from_mlm_fluxes_states <- function( file, var ){
   tmonth <- as.integer(tdstr)[2]
   tday <- as.integer(tdstr)[3]
   tyear <- as.integer(tdstr)[1]
-  tchron <- chron(dates. = (nctime - 23)/24, origin=c(tmonth, tday, tyear)) # nctime (hours)
-  tfinal <- as.POSIXct(tchron, tz = "GMT", origin=paste(tyear,tmonth,tday, sep = "-")) # nctime (hours)
+  
+  if (daily_flag){ 
+    # daily, deduct 23 hours before processing
+    tchron <- chron(dates. = (nctime - 23)/24, origin=c(tmonth, tday, tyear)) # nctime (hours)
+  }else{
+    # subdaily
+    tchron <- chron(dates. = nctime/24, origin=c(tmonth, tday, tyear)) # nctime (hours)
+  }
+  tfinal <- as.POSIXlt(tchron, tz = "GMT", origin=paste(tyear,tmonth,tday, sep = "-")) # nctime (hours)
   
   # Replacing missing values by NA
   data[data == misVal] <- NA

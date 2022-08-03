@@ -60,10 +60,11 @@ prepare_var_from_txt_input <- function(file, var ){
   read_in = data.frame(read.delim(file, header = F, sep = "", skip = 5))  # reading all the time series data lines
   nData <- length(read_in[,1])
   data <- read_in[, 6] # 6th col is the data
-  dStart <- as.Date(paste(read_in[1,1],"-",read_in[1,2],"-",read_in[1,3],sep=""))  # Infering the start date
-  dEnd <- as.Date(paste(read_in[nData,1],"-",read_in[nData,2],"-",read_in[nData,3],sep=""))  # Infering the end date
-  tchron <- seq.Date(dStart,dEnd, by= "days") # date vector
-  
+  # dStart <- as.Date(paste(read_in[1,1],"-",read_in[1,2],"-",read_in[1,3],sep=""))  # Infering the start date
+  # dEnd <- as.Date(paste(read_in[nData,1],"-",read_in[nData,2],"-",read_in[nData,3],sep=""))  # Infering the end date
+  # tchron <- seq.Date(dStart,dEnd, by= "days") # date vector
+  tchron <- as.POSIXct(paste(read_in[,1], "/", read_in[,2], "/", read_in[,3]," ", read_in[,4], ":", read_in[,5], sep = ""), 
+                       format="%Y/%m/%d %H:%M",tz="GMT")
   
   
   

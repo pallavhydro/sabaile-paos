@@ -9,8 +9,9 @@
 source("hydrographx2.R")
 
 
-path1 <- "."
-path2 <- "."
+file1 <- "./discharge.nc"
+file2 <- "./discharge2.nc"
+opath <- "." # output path
 
 suffix1 <- "def"
 suffix2 <- "cal"
@@ -23,5 +24,5 @@ station_id <- "9999999"
 title_text <- paste("Gauge: ", station_name, " . ", station_id) # Plot title
 
 
-plot_hydrographx2(path1, path2, suffix1, suffix2, station_id, title_text )
+plot_hydrographx2(opath, file1, file2, suffix1, suffix2, station_id, title_text )
 

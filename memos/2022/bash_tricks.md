@@ -82,6 +82,7 @@ set -g mouse on
 
 Then source the config file
 
+
 ```
 tmux source-file ~/.tmux.conf
 ```
@@ -94,3 +95,12 @@ conda create --name mhm_env
 ```
 \
 
+9. X11 forwarding (source: https://unix.stackexchange.com/a/12772)
+
+X11 forwarding needs to be enabled on both the client side and the server side.
+
+`On the client side`, the *-X* (capital X) option to ssh enables X11 forwarding, and you can make this the default (for all connections or for a specific connection) with *ForwardX11 yes* in `~/.ssh/config`.
+
+`On the server side`, *X11Forwarding yes* must be specified in */etc/ssh/sshd_config*. Note that the default is no forwarding (some distributions turn it on in their default /etc/ssh/sshd_config), and that the user cannot override this setting.
+
+\
